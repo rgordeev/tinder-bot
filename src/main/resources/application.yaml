@@ -1,0 +1,161 @@
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: ['configprops', 'env', 'health', 'info', 'logfile', 'loggers', 'metrics', 'prometheus', 'threaddump']
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+  info:
+    git:
+      mode: full
+  health:
+    mail:
+      enabled: false # When using the MailService, configure an SMTP server and set this to true
+  metrics:
+    export:
+      # Prometheus is the default metrics backend
+      prometheus:
+        enabled: true
+        step: 60
+    enable:
+      http: true
+      jvm: true
+      logback: true
+      process: true
+      system: true
+    distribution:
+      percentiles-histogram:
+        all: true
+      percentiles:
+        all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
+      slo:
+        method:
+          timed: 50ms,100ms,500ms,1000ms,5000ms,10000ms,50000ms,100000ms,500000ms,1000000ms
+    tags:
+      application: ${spring.application.name}
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+
+spring:
+  application:
+    name: telegram
+  profiles:
+    # The commented value for `active` can be replaced with valid Spring profiles to load.
+    # Otherwise, it will be filled in by maven when building the JAR file
+    # Either way, it can be overridden by `--spring.profiles.active` value passed in the commandline or `-Dspring.profiles.active` set in `JAVA_OPTS`
+    # active: ${SPRING_PROFILES_ACTIVE} #spring.profiles.active#
+    active: ${SPRING_PROFILES_ACTIVE} #spring.profiles.active#
+  jmx:
+    enabled: true
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
+  jackson:
+    serialization:
+      write-durations-as-timestamps: false
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:h2:mem:test
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+    name: telegram-prod-database
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+      maximum-pool-size: 50
+      driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      hibernate.jdbc.time_zone: UTC
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      # modify batch size as necessary
+      hibernate.batch_versioned_data: false
+      hibernate.jdbc.batch_size: 25
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+#      hibernate.query.fail_on_pagination_over_collection_fetch: false
+#      hibernate.query.in_clause_parameter_padding: true
+    hibernate:
+      ddl-auto: create-drop
+      use-new-id-generator-mappings: true
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    database-platform: org.hibernate.dialect.H2Dialect
+  task:
+    execution:
+      thread-name-prefix: telegram-executor-
+      pool:
+        core-size: 40
+        max-size: 40
+        queue-capacity: 20000
+    scheduling:
+      thread-name-prefix: telegram-scheduling-
+      pool:
+        size: 20
+  liquibase:
+    enabled: false
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+  messages:
+    basename: i18n/messages
+  main:
+    allow-bean-definition-overriding: false
+  output:
+    ansi:
+      console-available: true
+  servlet:
+    multipart:
+      max-file-size: 10485760
+      max-request-size: 20971520
+      file-size-threshold: 0
+      location: /tmp
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-admin-password: password
+      path: /h2-console
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+  undertow:
+    max-http-post-size: 20971520
+  tomcat:
+    max-http-form-post-size: 20971520
+  port: 8080
+
+# Properties to be exposed on the /info management endpoint
+info:
+  # Comma separated list of profiles that will trigger the ribbon to show
+  display-ribbon-on-profiles:
+    - dev
+    - prod
+
+
+application:
+  telegram:
+    bot:
+      bot-username: PMK3x_bot
+      bot-token: 5259733331:AAGxR0Lk0u9Uc3JfcdEs5XtyBd4E5ChJmpg
+

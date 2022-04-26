@@ -1,7 +1,6 @@
 package ru.rgordeev.telegrambot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -11,23 +10,26 @@ import ru.rgordeev.telegrambot.model.Person;
 import ru.rgordeev.telegrambot.services.PersonService;
 
 @Slf4j
-@Component
 public class TelegramBot extends TelegramLongPollingBot {
 
   private final PersonService personService;
+  private final String botUserName;
+  private final String botToken;
 
-  public TelegramBot(PersonService personService) {
+  public TelegramBot(PersonService personService, String botUserName, String botToken) {
     this.personService = personService;
+    this.botUserName = botUserName;
+    this.botToken = botToken;
   }
 
   @Override
   public String getBotUsername() {
-    return "PMK3x_bot";
+    return botUserName;
   }
 
   @Override
   public String getBotToken() {
-    return "5259733331:AAGxR0Lk0u9Uc3JfcdEs5XtyBd4E5ChJmpg";
+    return botToken;
   }
 
   @Override
@@ -39,7 +41,9 @@ public class TelegramBot extends TelegramLongPollingBot {
           .id(from.getId())
           .name(from.getFirstName())
           .lastName(from.getLastName()).build();
-      personService.addPerson(person);
+      if (!personService.findPerson(from.getId()).isPresent()) {
+        personService.addPerson(person);
+      }
       sendApiMethod(
           new SendMessage(update.getMessage().getChatId().toString(),
               "Hello from bot!")

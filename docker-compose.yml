@@ -1,0 +1,12 @@
+version: "3.4"
+services:
+  postgres:
+    image: postgres:12-alpine
+
+  telegram:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VERSION=${TAG}
+    image: rgordeev/telegram:${TAG}
